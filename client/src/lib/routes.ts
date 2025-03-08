@@ -1,11 +1,11 @@
-export function getCategoryDetailsRoute(categoryId: number) {
-    return `/categories/${categoryId}`;
+export function getCategoryDetailsRoute(categoryId: number | string) {
+  return `/categories/${categoryId}`;
 }
 
 export function getAddCategoryRoute() {
-    return `/add-category`;
+  return `/add-category`;
 }
 
-export function getAddTransactionRoute() {
-    return `/add-category`;
+export function getAddTransactionRoute(categoryId: number | string) {
+  return `/categoties/${categoryId}/add-transaction`;
 }

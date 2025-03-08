@@ -4,6 +4,7 @@ import {
   Route,
   useNavigate,
   Link,
+  useParams,
 } from "react-router-dom";
 import { Container } from "./components/Container";
 import { ReactNode } from "react";
@@ -144,15 +145,25 @@ const formSchema = z.object({
 });
 
 function AddTransaction() {
+  const { categoryId } = useParams();
   const navigate = useNavigate();
+
+  // todo akicha: this validation should be a part of the categories service
+  const _categoryId = isNaN(Number(categoryId))
+    ? undefined
+    : Number(categoryId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   async function _handleSubmit() {
+    if (!_categoryId) {
+      return;
+    }
+
     try {
-      await postTransactions(form.getValues());
+      await postTransactions(_categoryId, form.getValues());
       navigate("/");
     } catch (error) {
       console.error(error);
@@ -215,7 +226,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/add-category" element={<AddCategory />} />
-        <Route path="/add-transaction" element={<AddTransaction />} />
+        <Route
+          path="/categoties/:categoryId/add-transaction"
+          element={<AddTransaction />}
+        />
         <Route path="/categories/:categoryId" element={<CategoryDetails />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

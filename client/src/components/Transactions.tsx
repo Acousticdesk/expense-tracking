@@ -16,6 +16,7 @@ export function Transactions() {
   const { data, isLoading } = useQuery({
     queryKey: ["transactions"],
     queryFn: () =>
+      // todo akicha: this validation should be a part of the categories service
       isNaN(Number(categoryId))
         ? undefined
         : fetchTransactions(Number(categoryId)),
@@ -47,7 +48,7 @@ export function Transactions() {
           </li>
         ))}
         <li>
-          <Link to={getAddTransactionRoute()}>
+          <Link to={getAddTransactionRoute(categoryId as string)}>
             <Button>Add Transaction</Button>
           </Link>
         </li>

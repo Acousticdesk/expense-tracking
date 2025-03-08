@@ -16,9 +16,9 @@ interface PostTransactionsPayload {
 }
 
 export async function fetchTransactions(categoryId: Category["id"]) {
-  return fetch(`${import.meta.env.VITE_API_BASE_URL}/categories/${categoryId}/transactions`).then(
-    (res) => res.json(),
-  ) as Promise<FetchTransactionsResponse>;
+  return fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/categories/${categoryId}/transactions`,
+  ).then((res) => res.json()) as Promise<FetchTransactionsResponse>;
 }
 
 export function getTransactionId(transaction: Transaction) {
@@ -39,9 +39,12 @@ export function getTransactionsFromFetchTransactionsResponse(
   return response.transactions;
 }
 
-export async function postTransactions(payload: PostTransactionsPayload) {
+export async function postTransactions(
+  categoryId: string | number,
+  payload: PostTransactionsPayload,
+) {
   const response = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/transactions`,
+    `${import.meta.env.VITE_API_BASE_URL}/categories/${categoryId}/transactions`,
     {
       method: "POST",
       headers: {
