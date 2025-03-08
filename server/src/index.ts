@@ -1,11 +1,13 @@
 import 'dotenv/config'
-import express, { Request, Response, json } from "express";
+import express, { json } from "express";
+import cors from 'cors';
 import { router as transactionsRouter } from "./transactions/transactions.router";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(json());
+app.use(cors());
 
 app.use("/transactions", transactionsRouter);
 
