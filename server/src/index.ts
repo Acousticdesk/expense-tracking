@@ -1,12 +1,18 @@
-import express, { Request, Response } from "express";
+import 'dotenv/config'
+import express, { Request, Response, json } from "express";
+import { router as transactionsRouter } from "./transactions/transactions.router";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, Express with TypeScript!");
-});
+app.use(json());
+
+app.use("/transactions", transactionsRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error(reason);
 });
