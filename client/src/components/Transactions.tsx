@@ -26,7 +26,7 @@ export function Transactions() {
   return (
     <div>
       <p className="text-xl">Transactions</p>
-      <ul className="mt-2">
+      <ul className="mt-2 flex flex-col gap-y-2">
         {transactions.map((transaction) => (
           <li key={getTransactionId(transaction)}>
             <p>{getTransactionTitle(transaction)}</p>
