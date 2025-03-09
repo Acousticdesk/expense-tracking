@@ -9,7 +9,9 @@ import {
 export const router = Router();
 
 router.get("/", async (_, res) => {
-  const categoriesQueryResult = await pg.query("SELECT c.*, cc.hash as color_hash, cc.id as color_id FROM categories c LEFT JOIN category_colors cc ON c.color_id = cc.id");
+  const categoriesQueryResult = await pg.query(
+    "SELECT c.*, cc.hash as color_hash, cc.id as color_id FROM categories c LEFT JOIN category_colors cc ON c.color_id = cc.id",
+  );
 
   const categories = getPgQueryResultRows(categoriesQueryResult);
 
@@ -87,14 +89,19 @@ router.post("/:categoryId/transactions", async (req, res) => {
 
   try {
     const { categoryId } = req.params;
-    const { title, amount } = req.body;
+    const { title, amount, timestamp } = req.body;
 
     await client.query("BEGIN");
 
     // todo akicha: this should be a part of the transactions service
     const createTransactionQueryResult = await pg.query(
       "INSERT INTO transactions (timestamp, amount) VALUES ($1, $2) RETURNING *",
-      [new Date().toISOString(), amount],
+      [
+        !isNaN(Number(timestamp))
+          ? new Date(Number(timestamp)).toISOString()
+          : new Date().toISOString(),
+        amount,
+      ],
     );
 
     const transaction = getPgQueryResultRows(

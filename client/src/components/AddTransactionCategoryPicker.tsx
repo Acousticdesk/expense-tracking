@@ -14,6 +14,7 @@ interface AddTransactionCategoryPickerProps {
   onChange: (value: Category["id"]) => void;
 }
 
+// todo akicha: the user should be able to choose the top categories to be listed in this component
 export function AddTransactionCategoryPicker({
   value,
   onChange,
@@ -38,7 +39,7 @@ export function AddTransactionCategoryPicker({
     getCategoriesFromFetchCategoriesResponse(categoriesResponse);
 
   return (
-    <ul className="flex gap-4 overflow-x-auto">
+    <ul className="flex gap-4 flex-wrap">
       {categories.map((category) => (
         <li key={getCategoryId(category)} className="min-w-max">
           <button

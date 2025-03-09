@@ -17,11 +17,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
 import { AddTransactionCategoryPicker } from "@/components/AddTransactionCategoryPicker";
+import { AddTransactionDatePicker } from "@/components/AddTransactionDatePicker";
 
 const formSchema = z.object({
   title: z.string().optional(),
   amount: z.string(),
-  category_id: z.union([z.string(), z.number()]),
+  category_id: z.union([z.string(), z.number()]).optional(),
+  timestamp: z.number(),
 });
 
 export function AddTransaction() {
@@ -35,6 +37,11 @@ export function AddTransaction() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      amount: "",
+      timestamp: Date.now()
+    }
   });
 
   async function _handleSubmit() {
@@ -71,7 +78,7 @@ export function AddTransaction() {
 
           <Form {...form}>
             <form
-              className="flex flex-col gap-y-2 mt-2"
+              className="flex flex-col gap-y-4 mt-2"
               onSubmit={form.handleSubmit(_handleSubmit)}
             >
               <FormField
@@ -93,7 +100,7 @@ export function AddTransaction() {
                   <FormItem>
                     <FormLabel>Amount</FormLabel>
                     <FormControl>
-                      <Input {...field} value={field.value || ""} type="tel" />
+                      <Input {...field} type="tel" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -108,6 +115,19 @@ export function AddTransaction() {
                     <FormLabel>Category</FormLabel>
                     <FormControl>
                       <AddTransactionCategoryPicker {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                name="timestamp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <AddTransactionDatePicker {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
