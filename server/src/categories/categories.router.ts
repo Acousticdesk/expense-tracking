@@ -9,7 +9,7 @@ import {
 export const router = Router();
 
 router.get("/", async (_, res) => {
-  const categoriesQueryResult = await pg.query("SELECT * FROM categories");
+  const categoriesQueryResult = await pg.query("SELECT c.*, cc.hash as color_hash, cc.id as color_id FROM categories c LEFT JOIN category_colors cc ON c.color_id = cc.id");
 
   const categories = getPgQueryResultRows(categoriesQueryResult);
 
@@ -42,7 +42,7 @@ router.post("/", async (req, res) => {
   const client = await pg.connect();
 
   try {
-    const { title } = req.body;
+    const { title, color_id } = req.body;
 
     await client.query("BEGIN");
 
@@ -58,6 +58,13 @@ router.post("/", async (req, res) => {
     if (title) {
       await pg.query("UPDATE categories SET title = $1 WHERE id = $2", [
         title,
+        getCategoryId(category),
+      ]);
+    }
+
+    if (color_id) {
+      await pg.query("UPDATE categories SET color_id = $1 WHERE id = $2", [
+        color_id,
         getCategoryId(category),
       ]);
     }

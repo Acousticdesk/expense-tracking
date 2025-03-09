@@ -4,10 +4,12 @@ import {
   getCategoryId,
   getCategoriesFromFetchCategoriesResponse,
   getCategoryTitle,
+  getCategoryCategoryColorHash,
 } from "@/lib/services/categories.service";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
+import { CategoryColorTile } from "./CategoryColorsSelect";
 
 export function Categories() {
   const { data, isLoading } = useQuery({
@@ -39,7 +41,13 @@ export function Categories() {
           ? categories.map((category) => (
               <li key={getCategoryId(category)}>
                 <p>
-                  <Link to={getCategoryDetailsRoute(getCategoryId(category))}>
+                  <Link
+                    className="flex items-center gap-x-2"
+                    to={getCategoryDetailsRoute(getCategoryId(category))}
+                  >
+                    <CategoryColorTile
+                      colorHash={getCategoryCategoryColorHash(category)}
+                    />
                     {getCategoryTitle(category)}
                   </Link>
                 </p>
