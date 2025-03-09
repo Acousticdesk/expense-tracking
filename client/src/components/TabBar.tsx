@@ -19,7 +19,7 @@ export function TabBar({ className }: TabBarProps) {
     <div className={cn("flex justify-around border-t border-t-slate-950 py-2", className)}>
       {navItems.map(([path, icon]) => (
         <Link key={path} to={path}>
-          <Button variant={location.pathname === path ? "default" : "outline"}>{icon}</Button>
+          <Button variant={location.pathname === path ? "default" : "secondary"}>{icon}</Button>
         </Link>
       ))}
     </div>

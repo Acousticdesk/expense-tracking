@@ -12,7 +12,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="border-b border-b-slate-950 pb-2 flex-shrink-0">
+      <header className="border-b border-b-slate-950 py-2 flex-shrink-0">
         <Container>
           <Link className="text-md flex items-center gap-x-2" to="/">
             <HandCoins />
