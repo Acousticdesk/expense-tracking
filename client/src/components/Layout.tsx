@@ -11,15 +11,13 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-h-screen">
       <header className="border-b border-b-slate-950 pb-2 flex-shrink-0">
         <Container>
-          <div className="flex items-center gap-x-2">
+          <Link className="text-md flex items-center gap-x-2" to="/">
             <HandCoins />
-            <Link className="text-md" to="/">
-              Expense Tracking
-            </Link>
-          </div>
+            Expense Tracking
+          </Link>
         </Container>
       </header>
 

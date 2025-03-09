@@ -47,7 +47,7 @@ const formSchema = z.object({
   
     return (
       <Layout>
-        <Container>
+        <Container className="flex-auto">
           <div className="py-2">
             <p className="text-xl">Add Transaction</p>
   
