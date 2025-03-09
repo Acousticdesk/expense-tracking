@@ -30,6 +30,14 @@ router.get("/:categoryId/transactions", async (req, res) => {
   res.json({ transactions });
 });
 
+router.get("/colors", async (_, res) => {
+  const colorsQueryResult = await pg.query("SELECT * FROM category_colors");
+
+  const colors = getPgQueryResultRows(colorsQueryResult);
+
+  res.json({ colors });
+});
+
 router.post("/", async (req, res) => {
   const client = await pg.connect();
 

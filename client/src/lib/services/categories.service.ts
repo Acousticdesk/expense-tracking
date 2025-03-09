@@ -7,6 +7,17 @@ interface FetchCategoriesResponse {
   categories: Category[];
 }
 
+interface CategoryColor {
+  id: number;
+  hash: string;
+  name?: string;
+}
+
+interface FetchCategoryColorsResponse {
+  colors: CategoryColor[];
+}
+
+
 interface PostCategoriesPayload {
   title?: string;
 }
@@ -49,3 +60,29 @@ export async function postCategories(payload: PostCategoriesPayload) {
 
   return response.json() as Promise<Category>;
 }
+
+export async function fetchCategoryColors() {
+  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories/colors`)
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch category colors")
+  }
+
+  return response.json() as Promise<FetchCategoryColorsResponse>;
+}
+
+export function getCategoryColorsFromFetchCategoryColorsResponse(response: FetchCategoryColorsResponse) {
+  return response.colors;
+}
+
+export function getCategoryColorHash(categoryColor: CategoryColor) {
+  return categoryColor.hash;
+}
+
+export function getCategoryColorName(categoryColor: CategoryColor) {
+  return categoryColor.name;
+}
+
+export function getCategoryColorId(categoryColor: CategoryColor) {
+  return categoryColor.id;
+} 

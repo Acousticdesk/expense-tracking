@@ -3,11 +3,9 @@ import {
   Routes,
   Route,
   useNavigate,
-  Link,
   useParams,
 } from "react-router-dom";
 import { Container } from "./components/Container";
-import { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,34 +19,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { postTransactions } from "./lib/services/transactions.service";
 import { Categories } from "./components/Categories";
 import { Transactions } from "./components/Transactions";
-import { postCategories } from "./lib/services/categories.service";
-
-interface LayoutProps {
-  children: ReactNode;
-}
-
-function Layout({ children }: LayoutProps) {
-  return (
-    <div>
-      <header className="border-b border-b-slate-950 pb-2">
-        <Container>
-          <p className="text-2xl">
-            <Link to="/">Expense Tracking</Link>
-          </p>
-        </Container>
-      </header>
-
-      {children}
-
-      <Toaster />
-    </div>
-  );
-}
+import { AddCategory } from "./components/AddCategory";
+import { Layout } from "./components/Layout";
 
 function Home() {
   return (
@@ -78,63 +54,6 @@ function NotFound() {
   return (
     <Layout>
       <Container>Sorry, we couldn&apos;t find that 🫣</Container>
-    </Layout>
-  );
-}
-
-const addCategoryFormSchema = z.object({
-  title: z.string().optional(),
-});
-
-function AddCategory() {
-  const navigate = useNavigate();
-
-  const form = useForm<z.infer<typeof addCategoryFormSchema>>({
-    resolver: zodResolver(addCategoryFormSchema),
-  });
-
-  async function _handleSubmit() {
-    try {
-      await postCategories(form.getValues());
-      navigate("/");
-    } catch (error) {
-      console.error(error);
-
-      toast(
-        "Oops... Something went wrong while adding the category. Please try again later.",
-      );
-    }
-  }
-
-  return (
-    <Layout>
-      <Container>
-        <div className="py-2">
-          <p className="text-xl">Add Category</p>
-
-          <Form {...form}>
-            <form
-              className="flex flex-col gap-y-2 mt-2"
-              onSubmit={form.handleSubmit(_handleSubmit)}
-            >
-              <FormField
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button type="submit">Add Category</Button>
-            </form>
-          </Form>
-        </div>
-      </Container>
     </Layout>
   );
 }
