@@ -21,7 +21,7 @@ interface CategoryColorTileProps {
 export function CategoryColorTile({ colorHash }: CategoryColorTileProps) {
   return (
     <span
-      className="w-4 h-4 rounded"
+      className="w-4 h-4 rounded inline-block"
       style={{ backgroundColor: colorHash || "#808080" }}
     />
   );

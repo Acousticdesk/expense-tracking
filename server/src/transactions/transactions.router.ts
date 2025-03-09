@@ -4,12 +4,34 @@ import { getTransactionId, Transaction } from "./transactions.service";
 
 export const router = Router();
 
-router.get("/", async (_, res) => {
-  const transctionsQueryResult = await pg.query("SELECT * FROM transactions");
+// todo akicha: maybe this should be performed somewhere else
+router.get("/", async (req, res) => {
+  const HOURS_24_IN_MS = 24 * 60 * 60 * 1000;
+  const { start_date, end_date } = req.query;
+  
+  const startDateTimestamp = !isNaN(Number(start_date))
+    ? new Date(Number(start_date)).toISOString()
+    : new Date(Date.now() - HOURS_24_IN_MS).toISOString();
 
-  const transactions = getPgQueryResultRows(transctionsQueryResult);
+  const endDateTimestamp = !isNaN(Number(end_date))
+    ? new Date(Number(end_date)).toISOString()
+    : new Date().toISOString();
 
-  res.json({ transactions });
+  const totalQueryResult = await pg.query(
+    "SELECT SUM(t.amount) FROM transactions t WHERE t.timestamp BETWEEN $1 AND $2",
+    [startDateTimestamp, endDateTimestamp],
+  );
+
+  const total = getPgQueryResultRows(totalQueryResult)[0].sum;
+
+  const categoriesSplitQueryResult = await pg.query(
+    "SELECT c.id as category_id, c.title as category_title, SUM(t.amount) FROM transactions t LEFT JOIN categories c ON t.category_id = c.id WHERE t.timestamp BETWEEN $1 AND $2 GROUP BY c.id",
+    [startDateTimestamp, endDateTimestamp],
+  );
+
+  const categoriesSplit = getPgQueryResultRows(categoriesSplitQueryResult);
+
+  res.json({ total, categoriesSplit });
 });
 
 router.post("/", async (req, res) => {
@@ -21,15 +43,20 @@ router.post("/", async (req, res) => {
       [new Date().toISOString(), amount],
     );
 
-    const transaction = getPgQueryResultRows(createTransactionQueryResult)[0] as Transaction;
+    const transaction = getPgQueryResultRows(
+      createTransactionQueryResult,
+    )[0] as Transaction;
 
     if (title) {
-      await pg.query("UPDATE transactions SET title = $1 WHERE id = $2", [title, getTransactionId(transaction)]);
+      await pg.query("UPDATE transactions SET title = $1 WHERE id = $2", [
+        title,
+        getTransactionId(transaction),
+      ]);
     }
 
     res.json(transaction);
   } catch (error) {
-    console.log(error, 'the error');
+    console.log(error, "the error");
     res.status(500).send();
   }
 });

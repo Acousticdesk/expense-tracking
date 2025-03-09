@@ -25,7 +25,7 @@ export function AddTransactionDatePicker({
       {dateItems.map(([label, timestamp, isActive]) => (
         <li key={label}>
           <button
-            className={cn("px-2 py-1 rounded border border-gray-300 min-w-max", {
+            className={cn("px-2 py-1 rounded border border-gray-300 min-w-max text-sm", {
               "bg-gray-300": isActive,
             })}
             onClick={() => onChange(timestamp)}

@@ -44,7 +44,7 @@ export function AddTransactionCategoryPicker({
         <li key={getCategoryId(category)} className="min-w-max">
           <button
             type="button"
-            className={cn("py-1 px-2 rounded border border-gray-300", {
+            className={cn("py-1 px-2 rounded border border-gray-300 text-sm", {
               "bg-gray-300": getCategoryId(category) === value,
             })}
             onClick={() => onChange(getCategoryId(category))}

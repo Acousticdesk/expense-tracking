@@ -1,8 +1,8 @@
 import {
-  fetchTransactions,
+  fetchTransactionsPerCategory,
   getTransactionAmount,
   getTransactionId,
-  getTransactionsFromFetchTransactionsResponse,
+  getTransactionsFromFetchTransactionsPerCategoryResponse,
   getTransactionTitle,
 } from "@/lib/services/transactions.service";
 import { useQuery } from "@tanstack/react-query";
@@ -19,7 +19,7 @@ export function Transactions() {
       // todo akicha: this validation should be a part of the categories service
       isNaN(Number(categoryId))
         ? undefined
-        : fetchTransactions(Number(categoryId)),
+        : fetchTransactionsPerCategory(Number(categoryId)),
   });
 
   if (isLoading) {
@@ -30,7 +30,7 @@ export function Transactions() {
     return null;
   }
 
-  const transactions = getTransactionsFromFetchTransactionsResponse(data);
+  const transactions = getTransactionsFromFetchTransactionsPerCategoryResponse(data);
 
   return (
     <div>
