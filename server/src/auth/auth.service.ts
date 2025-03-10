@@ -4,6 +4,10 @@ interface User {
     password: string;
 }
 
+export interface DecodedUserToken {
+    id: number;
+}
+
 export function getUserPassword(user: User) {
     return user.password;
 }

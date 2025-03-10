@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { getPgQueryResultRows, pg } from "../services/pg";
 import { getUserPassword } from "./auth.service";
+import { authMiddleware } from "./auth.middleware";
 
 export const router = Router();
 
@@ -28,8 +29,6 @@ router.post("/login", async (req, res) => {
     return;
   }
 
-  console.log(process.env, 'the env')
-
   const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string);
 
   res.status(200).json({
@@ -53,6 +52,15 @@ router.post("/register", async (req, res) => {
     );
 
     res.status(201).send();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send();
+  }
+});
+
+router.post("/me", authMiddleware, async (req, res) => {
+  try {
+    res.json(req.user);
   } catch (error) {
     console.error(error);
     res.status(500).send();

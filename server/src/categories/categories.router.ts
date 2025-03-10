@@ -6,10 +6,11 @@ import {
   getTransactionId,
 } from "../transactions/transactions.service";
 import { QueryResult } from "pg";
+import { authMiddleware } from "../auth/auth.middleware";
 
 export const router = Router();
 
-router.get("/", async (_, res) => {
+router.get("/", authMiddleware, async (_, res) => {
   const categoriesQueryResult = await pg.query(
     "SELECT c.*, cc.hash as color_hash, cc.id as color_id FROM categories c LEFT JOIN category_colors cc ON c.color_id = cc.id",
   );
@@ -19,7 +20,7 @@ router.get("/", async (_, res) => {
   res.json({ categories });
 });
 
-router.get("/:categoryId/transactions", async (req, res) => {
+router.get("/:categoryId/transactions", authMiddleware, async (req, res) => {
   const { categoryId } = req.params;
 
   let transactionsQueryResult: QueryResult;
@@ -41,7 +42,7 @@ router.get("/:categoryId/transactions", async (req, res) => {
   res.json({ transactions });
 });
 
-router.get("/colors", async (_, res) => {
+router.get("/colors", authMiddleware, async (_, res) => {
   const colorsQueryResult = await pg.query("SELECT * FROM category_colors");
 
   const colors = getPgQueryResultRows(colorsQueryResult);
@@ -49,7 +50,7 @@ router.get("/colors", async (_, res) => {
   res.json({ colors });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   const client = await pg.connect();
 
   try {
@@ -93,7 +94,7 @@ router.post("/", async (req, res) => {
   client.release();
 });
 
-router.post("/:categoryId/transactions", async (req, res) => {
+router.post("/:categoryId/transactions", authMiddleware, async (req, res) => {
   const client = await pg.connect();
 
   try {

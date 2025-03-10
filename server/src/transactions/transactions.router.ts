@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { getPgQueryResultRows, pg } from "../services/pg";
 import { getTransactionId, Transaction } from "./transactions.service";
+import { authMiddleware } from "../auth/auth.middleware";
 
 export const router = Router();
 
 // todo akicha: maybe this should be performed somewhere else
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   const HOURS_24_IN_MS = 24 * 60 * 60 * 1000;
   const { start_date, end_date } = req.query;
   
@@ -34,7 +35,7 @@ router.get("/", async (req, res) => {
   res.json({ total, categoriesSplit });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   try {
     const { title, amount } = req.body;
 
@@ -61,7 +62,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.delete("/:transactionId", async (req, res) => {
+router.delete("/:transactionId", authMiddleware, async (req, res) => {
   const { transactionId } = req.params;
 
   await pg.query("DELETE FROM transactions WHERE id = $1", [transactionId]);
