@@ -14,7 +14,11 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/Container";
 import { Header } from "@/components/Header";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import {
+  postLogin,
+  getTokenFromPostLoginResponse,
+} from "@/lib/services/auth.service";
 
 const formSchema = z.object({
   username: z.string().email(),
@@ -22,6 +26,8 @@ const formSchema = z.object({
 });
 
 export function Login() {
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -30,7 +36,26 @@ export function Login() {
     },
   });
 
-  function _handleSubmit() {}
+  async function _handleSubmit() {
+    try {
+      const values = form.getValues();
+      const response = await postLogin(values);
+
+      const token = getTokenFromPostLoginResponse(response);
+
+      localStorage.setItem("token", token);
+
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <div>
@@ -62,7 +87,7 @@ export function Login() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} type="password" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -72,7 +97,10 @@ export function Login() {
             <Button type="submit">Login</Button>
           </form>
           <p className="text-sm mt-4">
-            No account? <Link className="text-blue-600" to="/sign-up">Sign Up</Link>
+            No account?{" "}
+            <Link className="text-blue-600" to="/sign-up">
+              Sign Up
+            </Link>
           </p>
         </Form>
       </Container>

@@ -1,44 +1,61 @@
 import { Router } from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { getPgQueryResultRows, pg } from "../services/pg";
+import { getUserPassword } from "./auth.service";
 
 export const router = Router();
 
-// todo akicha: maybe this should be performed somewhere else
-router.get("/login", async (req, res) => {
-  
-});
-
-router.post("/", async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
-    const { title, amount } = req.body;
+    const { username, password } = req.body;
 
-    const createTransactionQueryResult = await pg.query(
-      "INSERT INTO transactions (timestamp, amount) VALUES ($1, $2) RETURNING *",
-      [new Date().toISOString(), amount],
-    );
+  const userQueryResult = await pg.query("SELECT * FROM users WHERE username = $1", [username]);
 
-    const transaction = getPgQueryResultRows(
-      createTransactionQueryResult,
-    )[0] as Transaction;
+  const user = getPgQueryResultRows(userQueryResult)[0];
 
-    if (title) {
-      await pg.query("UPDATE transactions SET title = $1 WHERE id = $2", [
-        title,
-        getTransactionId(transaction),
-      ]);
-    }
+  if (!user) {
+    res.status(401).send();
 
-    res.json(transaction);
+    return;
+  }
+
+  const userPassword = getUserPassword(user);
+
+  if (!await bcrypt.compare(password, userPassword)) {
+    res.status(401).send();
+
+    return;
+  }
+
+  console.log(process.env, 'the env')
+
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string);
+
+  res.status(200).json({
+    token,
+  });
   } catch (error) {
-    console.log(error, "the error");
+    console.error(error);
     res.status(500).send();
   }
 });
 
-router.delete("/:transactionId", async (req, res) => {
-  const { transactionId } = req.params;
+router.post("/register", async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-  await pg.query("DELETE FROM transactions WHERE id = $1", [transactionId]);
+    const passwordHash = await bcrypt.hash(password, 10);
 
-  res.status(200).send();
+    await pg.query(
+      "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *",
+      [username, passwordHash],
+    );
+
+    res.status(201).send();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send();
+  }
 });
+

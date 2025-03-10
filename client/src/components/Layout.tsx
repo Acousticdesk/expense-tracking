@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import { Toaster } from "sonner";
 import { TabBar } from "./TabBar";
 import { Header } from "./Header";
 
@@ -15,7 +14,6 @@ export function Layout({ children }: LayoutProps) {
       {children}
 
       <TabBar />
-      <Toaster />
     </div>
   );
 }

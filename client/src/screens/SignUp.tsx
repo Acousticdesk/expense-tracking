@@ -14,6 +14,13 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/Container";
 import { Header } from "@/components/Header";
+import {
+  getTokenFromPostLoginResponse,
+  postLogin,
+  postRegister,
+} from "@/lib/services/auth.service";
+import { toast } from "sonner";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   username: z.string().email(),
@@ -21,6 +28,8 @@ const formSchema = z.object({
 });
 
 export function SignUp() {
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -29,7 +38,31 @@ export function SignUp() {
     },
   });
 
-  function _handleSubmit() {}
+  async function _handleSubmit() {
+    const values = form.getValues();
+
+    try {
+      await postRegister(values);
+      const response = await postLogin(values);
+
+      const token = getTokenFromPostLoginResponse(response);
+
+      localStorage.setItem("token", token);
+
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+      toast("Something went wrong. Please try again later.");
+    }
+
+    form.reset();
+  }
+
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <div>
@@ -61,14 +94,14 @@ export function SignUp() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} type="password" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit">Login</Button>
+            <Button type="submit">Create Account</Button>
           </form>
         </Form>
       </Container>
