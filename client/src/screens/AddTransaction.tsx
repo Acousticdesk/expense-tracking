@@ -40,8 +40,8 @@ export function AddTransaction() {
     defaultValues: {
       title: "",
       amount: "",
-      timestamp: Date.now()
-    }
+      timestamp: Date.now(),
+    },
   });
 
   async function _handleSubmit() {

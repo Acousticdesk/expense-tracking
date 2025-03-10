@@ -4,19 +4,39 @@ import { CategoryDetails } from "./screens/CategoryDetails";
 import { NotFound } from "./screens/NotFound";
 import { AddTransaction } from "./screens/AddTransaction";
 import { Categories } from "./screens/Categories";
+import { Login } from "./screens/Login";
+import { RequireToken } from "./components/RequireToken";
+import { SignUp } from "./screens/SignUp";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<AddTransaction />} />
-        <Route path="/add-category" element={<AddCategory />} />
-        <Route path="/categories" element={<Categories />} />
-        <Route
-          path="/categoties/:categoryId/add-transaction"
-          element={<AddTransaction />}
-        />
-        <Route path="/categories/:categoryId" element={<CategoryDetails />} />
+        <Route element={<RequireToken />}>
+          <Route path="/" element={<AddTransaction />} />
+        </Route>
+
+        <Route element={<RequireToken />}>
+          <Route path="/add-category" element={<AddCategory />} />
+        </Route>
+
+        <Route element={<RequireToken />}>
+          <Route path="/categories" element={<Categories />} />
+        </Route>
+
+        <Route element={<RequireToken />}>
+          <Route
+            path="/categoties/:categoryId/add-transaction"
+            element={<AddTransaction />}
+          />
+        </Route>
+
+        <Route element={<RequireToken />}>
+          <Route path="/categories/:categoryId" element={<CategoryDetails />} />
+        </Route>
+
+        <Route path="/login" element={<Login />} />
+        <Route path="/sign-up" element={<SignUp />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
