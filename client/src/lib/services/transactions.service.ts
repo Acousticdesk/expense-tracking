@@ -1,3 +1,4 @@
+import { addAuthorizationHeader } from "./auth.service";
 import { Category } from "./categories.service";
 
 interface Transaction {
@@ -21,6 +22,7 @@ export async function fetchTransactionsPerCategory(categoryId?: Category["id"]) 
 
   return fetch(
     `${import.meta.env.VITE_API_BASE_URL}/categories/${_categoryId}/transactions?${searchParams}`,
+    {headers: addAuthorizationHeader({})},
   ).then((res) => res.json()) as Promise<FetchTransactionsPerCategoryResponse>;
 }
 
@@ -50,6 +52,9 @@ export async function fetchTransactions(params?: FetchTransactionsParams) {
 
   return fetch(
     `${import.meta.env.VITE_API_BASE_URL}/transactions?${searchParams}`,
+    {
+      headers: addAuthorizationHeader({}),
+    }
   ).then((res) => res.json()) as Promise<FetchTransactionsResponse>;
 }
 
@@ -91,9 +96,9 @@ export async function postTransactions(
     `${import.meta.env.VITE_API_BASE_URL}/categories/${categoryId}/transactions`,
     {
       method: "POST",
-      headers: {
+      headers: addAuthorizationHeader({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(payload),
     },
   );

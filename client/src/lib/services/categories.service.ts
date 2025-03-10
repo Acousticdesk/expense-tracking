@@ -1,3 +1,5 @@
+import { addAuthorizationHeader } from "./auth.service";
+
 export interface Category {
   id: number;
   title: string;
@@ -24,9 +26,9 @@ interface PostCategoriesPayload {
 }
 
 export async function fetchCategories() {
-  return fetch(`${import.meta.env.VITE_API_BASE_URL}/categories`).then((res) =>
-    res.json(),
-  ) as Promise<FetchCategoriesResponse>;
+  return fetch(`${import.meta.env.VITE_API_BASE_URL}/categories`, {
+    headers: addAuthorizationHeader({}),
+  }).then((res) => res.json()) as Promise<FetchCategoriesResponse>;
 }
 
 export function getCategoryId(category: Category) {
@@ -56,9 +58,9 @@ export async function postCategories(payload: PostCategoriesPayload) {
     `${import.meta.env.VITE_API_BASE_URL}/categories`,
     {
       method: "POST",
-      headers: {
+      headers: addAuthorizationHeader({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(payload),
     },
   );
@@ -73,6 +75,9 @@ export async function postCategories(payload: PostCategoriesPayload) {
 export async function fetchCategoryColors() {
   const response = await fetch(
     `${import.meta.env.VITE_API_BASE_URL}/categories/colors`,
+    {
+      headers: addAuthorizationHeader({}),
+    }
   );
 
   if (!response.ok) {

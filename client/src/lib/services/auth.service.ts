@@ -1,6 +1,6 @@
 interface PostRegisterPayload {
-    username: string;
-    password: string;
+  username: string;
+  password: string;
 }
 
 export async function postRegister(payload: PostRegisterPayload) {
@@ -8,9 +8,9 @@ export async function postRegister(payload: PostRegisterPayload) {
     `${import.meta.env.VITE_API_BASE_URL}/auth/register`,
     {
       method: "POST",
-      headers: {
+      headers: addAuthorizationHeader({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(payload),
     },
   );
@@ -23,33 +23,40 @@ export async function postRegister(payload: PostRegisterPayload) {
 }
 
 interface PostLoginResponse {
-    token: string;
+  token: string;
 }
 
 interface PostLoginPayload {
-    username: string;
-    password: string;
+  username: string;
+  password: string;
 }
 
 export async function postLogin(payload: PostLoginPayload) {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/auth/login`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      },
-    );
-  
-    if (!response.ok) {
-      throw new Error("Failed to login");
-    }
-  
-    return response.json() as Promise<PostLoginResponse>;
+  const response = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/auth/login`,
+    {
+      method: "POST",
+      headers: addAuthorizationHeader({
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify(payload),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to login");
   }
 
-  export function getTokenFromPostLoginResponse(response: PostLoginResponse) {
-    return response.token;
-  }
+  return response.json() as Promise<PostLoginResponse>;
+}
+
+export function getTokenFromPostLoginResponse(response: PostLoginResponse) {
+  return response.token;
+}
+
+export function addAuthorizationHeader(headers: Record<string, string>) {
+  return {
+    ...headers,
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+  };
+}
