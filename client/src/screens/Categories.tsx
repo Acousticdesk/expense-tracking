@@ -76,7 +76,7 @@ export function Categories() {
               <section className="mt-4">
                 <p className="text-xl">Categories</p>
 
-                <ul className="mt-4 flex flex-col gap-y-2">
+                <ul className="mt-4 flex flex-col gap-y-4">
                   {isLoading ? (
                     <li>
                       <p className="text=sm">Loading...</p>
@@ -92,27 +92,37 @@ export function Categories() {
                   {categoriesSplit?.length
                     ? categoriesSplit.map((categorySplit) => (
                         <li key={getCategorySplitCategoryTitle(categorySplit)}>
-                          <p>
-                            <Link
-                              className="flex items-center gap-x-2 text-sm justify-between"
-                              to={getCategoryDetailsRoute(
-                                getCategorySplitCategoryId(categorySplit),
-                              )}
-                            >
-                              <span className="flex items-center gap-x-2">
-                                <CategoryColorTile
-                                  colorHash={getCategorySplitCategoryColorHash(
+                          <Link
+                            className="flex items-center gap-x-2 text-sm justify-between relative"
+                            to={getCategoryDetailsRoute(
+                              getCategorySplitCategoryId(categorySplit),
+                            )}
+                          >
+                            <span
+                              className="absolute left-0 inset-y-0 opacity-15"
+                              style={{
+                                backgroundColor:
+                                  getCategorySplitCategoryColorHash(
                                     categorySplit,
-                                  )}
-                                />
-                                {getCategorySplitCategoryTitle(categorySplit)}
-                              </span>
-                              <span>
-                                {getCategorySplitCategorySum(categorySplit)}{" "}
-                                {CURRENCY}
-                              </span>
-                            </Link>
-                          </p>
+                                  ),
+                                width: total
+                                  ? `${(getCategorySplitCategorySum(categorySplit) / total) * 100}%`
+                                  : "0px",
+                              }}
+                            ></span>
+                            <span className="flex items-center gap-x-2">
+                              <CategoryColorTile
+                                colorHash={getCategorySplitCategoryColorHash(
+                                  categorySplit,
+                                )}
+                              />
+                              {getCategorySplitCategoryTitle(categorySplit)}
+                            </span>
+                            <span>
+                              {getCategorySplitCategorySum(categorySplit)}{" "}
+                              {CURRENCY}
+                            </span>
+                          </Link>
                         </li>
                       ))
                     : null}
