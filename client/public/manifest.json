@@ -1,0 +1,22 @@
+{
+    "name": "Expense Tracking",
+    "short_name": "Expense Tracking",
+    "description": "An app designed for quick expense tracking.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#2196f3",
+    "icons": [
+      {
+        "src": "/vite.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "/vite.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ]
+  }
+  

@@ -15,7 +15,7 @@ interface PostTransactionsPayload {
   amount: string;
 }
 
-export async function fetchTransactionsPerCategory(categoryId: Category["id"]) {
+export async function fetchTransactionsPerCategory(categoryId?: Category["id"]) {
   const searchParams = new URLSearchParams();
   const _categoryId = categoryId || "all";
 
