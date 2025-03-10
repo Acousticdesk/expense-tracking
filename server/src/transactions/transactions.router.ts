@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
   const total = getPgQueryResultRows(totalQueryResult)[0].sum;
 
   const categoriesSplitQueryResult = await pg.query(
-    "SELECT c.id as category_id, c.title as category_title, SUM(t.amount) FROM transactions t LEFT JOIN categories c ON t.category_id = c.id WHERE t.timestamp BETWEEN $1 AND $2 GROUP BY c.id",
+    "SELECT c.id as category_id, COALESCE(c.title, 'No Category') as category_title, SUM(t.amount) FROM transactions t LEFT JOIN categories c ON t.category_id = c.id WHERE t.timestamp BETWEEN $1 AND $2 GROUP BY c.id",
     [startDateTimestamp, endDateTimestamp],
   );
 

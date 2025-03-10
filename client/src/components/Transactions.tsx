@@ -18,7 +18,7 @@ export function Transactions() {
     queryFn: () =>
       // todo akicha: this validation should be a part of the categories service
       isNaN(Number(categoryId))
-        ? undefined
+        ? fetchTransactionsPerCategory()
         : fetchTransactionsPerCategory(Number(categoryId)),
   });
 

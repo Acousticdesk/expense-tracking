@@ -5,6 +5,7 @@ import {
   Transaction,
   getTransactionId,
 } from "../transactions/transactions.service";
+import { QueryResult } from "pg";
 
 export const router = Router();
 
@@ -21,11 +22,19 @@ router.get("/", async (_, res) => {
 router.get("/:categoryId/transactions", async (req, res) => {
   const { categoryId } = req.params;
 
-  // todo akicha: this should be a part of the transactions service
-  const transactionsQueryResult = await pg.query(
-    "SELECT * FROM transactions WHERE category_id = $1",
-    [categoryId],
-  );
+  let transactionsQueryResult: QueryResult;
+
+  if (categoryId === "all") {
+    transactionsQueryResult = await pg.query(
+      "SELECT * FROM transactions WHERE category_id IS NULL",
+    );
+  } else {
+    // todo akicha: this should be a part of the transactions service
+    transactionsQueryResult = await pg.query(
+      "SELECT * FROM transactions WHERE category_id = $1",
+      [categoryId],
+    );
+  }
 
   const transactions = getPgQueryResultRows(transactionsQueryResult);
 

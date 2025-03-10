@@ -17,9 +17,10 @@ interface PostTransactionsPayload {
 
 export async function fetchTransactionsPerCategory(categoryId: Category["id"]) {
   const searchParams = new URLSearchParams();
+  const _categoryId = categoryId || "all";
 
   return fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/categories/${categoryId}/transactions?${searchParams}`,
+    `${import.meta.env.VITE_API_BASE_URL}/categories/${_categoryId}/transactions?${searchParams}`,
   ).then((res) => res.json()) as Promise<FetchTransactionsPerCategoryResponse>;
 }
 
