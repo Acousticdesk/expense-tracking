@@ -15,6 +15,7 @@ import {
   getCategoriesSplitFromFetchTransactionsResponse,
   getCategorySplitCategoryId,
   getCategorySplitCategorySum,
+  getCategorySplitCategoryColorHash,
 } from "@/lib/services/transactions.service";
 
 const CURRENCY = "CAD";
@@ -34,16 +35,10 @@ export function Categories() {
       fetchTransactions({ startDate: dateRange[0], endDate: dateRange[1] }),
   });
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (!data) {
-    return null;
-  }
-
-  const total = getTotalFromFetchTransactionsResponse(data);
-  const categoriesSplit = getCategoriesSplitFromFetchTransactionsResponse(data);
+  const total = data ? getTotalFromFetchTransactionsResponse(data) : undefined;
+  const categoriesSplit = data
+    ? getCategoriesSplitFromFetchTransactionsResponse(data)
+    : undefined;
 
   return (
     <Layout>
@@ -74,7 +69,7 @@ export function Categories() {
                 <p className="text-xl">Expenses</p>
                 {/* todo akicha: provide a way to select currency */}
                 <p className="text-sm mt-2">
-                  {total ? `${total} ${CURRENCY}` : "No expenses yet"} 
+                  {total ? `${total} ${CURRENCY}` : "No expenses yet"}
                 </p>
               </section>
 
@@ -82,12 +77,19 @@ export function Categories() {
                 <p className="text-xl">Categories</p>
 
                 <ul className="mt-4 flex flex-col gap-y-2">
-                  {!categoriesSplit.length ? (
+                  {isLoading ? (
                     <li>
-                      <p className="text-sm">It looks like you don't have any categories yet</p>
+                      <p className="text=sm">Loading...</p>
                     </li>
                   ) : null}
-                  {categoriesSplit.length
+                  {!isLoading && !categoriesSplit?.length ? (
+                    <li>
+                      <p className="text-sm">
+                        It looks like you don't have any categories yet
+                      </p>
+                    </li>
+                  ) : null}
+                  {categoriesSplit?.length
                     ? categoriesSplit.map((categorySplit) => (
                         <li key={getCategorySplitCategoryTitle(categorySplit)}>
                           <p>
@@ -98,8 +100,11 @@ export function Categories() {
                               )}
                             >
                               <span className="flex items-center gap-x-2">
-                                {/* todo akicha: provide the actual color of the category here */}
-                                <CategoryColorTile />
+                                <CategoryColorTile
+                                  colorHash={getCategorySplitCategoryColorHash(
+                                    categorySplit,
+                                  )}
+                                />
                                 {getCategorySplitCategoryTitle(categorySplit)}
                               </span>
                               <span>

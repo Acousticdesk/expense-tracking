@@ -28,7 +28,7 @@ router.get("/", authMiddleware, async (req, res) => {
   const total = getPgQueryResultRows(totalQueryResult)[0].sum;
 
   const categoriesSplitQueryResult = await pg.query(
-    "SELECT c.id as category_id, COALESCE(c.title, 'No Category') as category_title, SUM(t.amount) FROM transactions t LEFT JOIN categories c ON t.category_id = c.id WHERE t.timestamp BETWEEN $1 AND $2 AND t.user_id = $3 GROUP BY c.id",
+    "SELECT c.id as category_id, cc.hash as category_color_hash, COALESCE(c.title, 'No Category') as category_title, SUM(t.amount) FROM transactions t LEFT JOIN categories c ON t.category_id = c.id LEFT JOIN category_colors cc ON c.color_id = cc.id WHERE t.timestamp BETWEEN $1 AND $2 AND t.user_id = $3 GROUP BY c.id, cc.hash",
     [startDateTimestamp, endDateTimestamp, getUserId(req.user)],
   );
 

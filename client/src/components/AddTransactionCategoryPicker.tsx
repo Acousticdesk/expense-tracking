@@ -2,6 +2,7 @@ import {
   Category,
   fetchCategories,
   getCategoriesFromFetchCategoriesResponse,
+  getCategoryCategoryColorHash,
   getCategoryId,
   getCategoryTitle,
 } from "@/lib/services/categories.service";
@@ -50,8 +51,7 @@ export function AddTransactionCategoryPicker({
             onClick={() => onChange(getCategoryId(category))}
           >
             <div className="flex items-center gap-x-2">
-              {/* todo akicha: add the actual color of the category */}
-              <CategoryColorTile />
+              <CategoryColorTile colorHash={getCategoryCategoryColorHash(category)} />
               <p>{getCategoryTitle(category)}</p>
             </div>
           </button>

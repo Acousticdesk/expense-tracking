@@ -29,6 +29,7 @@ export async function fetchTransactionsPerCategory(categoryId?: Category["id"]) 
 interface CategorySplit {
   category_title: string;
   category_id: number;
+  category_color_hash?: string;
   sum: number;
 }
 
@@ -120,4 +121,8 @@ export function getCategorySplitCategoryId(categorySplit: CategorySplit) {
 
 export function getCategorySplitCategorySum(categorySplit: CategorySplit) {
   return categorySplit.sum;
+}
+
+export function getCategorySplitCategoryColorHash(categorySplit: CategorySplit) {
+  return categorySplit.category_color_hash;
 }
