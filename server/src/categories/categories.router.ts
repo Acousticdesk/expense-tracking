@@ -1,18 +1,20 @@
 import { Router } from "express";
 import { getPgQueryResultRows, pg } from "../services/pg";
-import { Category, getCategoryId } from "./categories";
+import { Category, getCategoryId, getCategoryUserId } from "./categories";
 import {
   Transaction,
   getTransactionId,
 } from "../transactions/transactions.service";
 import { QueryResult } from "pg";
 import { authMiddleware } from "../auth/auth.middleware";
+import { getUserId } from "../auth/auth.service";
 
 export const router = Router();
 
-router.get("/", authMiddleware, async (_, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   const categoriesQueryResult = await pg.query(
-    "SELECT c.*, cc.hash as color_hash, cc.id as color_id FROM categories c LEFT JOIN category_colors cc ON c.color_id = cc.id",
+    "SELECT c.*, cc.hash as color_hash, cc.id as color_id FROM categories c LEFT JOIN category_colors cc ON c.color_id = cc.id WHERE c.user_id = $1",
+    [getUserId(req.user)],
   );
 
   const categories = getPgQueryResultRows(categoriesQueryResult);
@@ -27,13 +29,14 @@ router.get("/:categoryId/transactions", authMiddleware, async (req, res) => {
 
   if (categoryId === "all") {
     transactionsQueryResult = await pg.query(
-      "SELECT * FROM transactions WHERE category_id IS NULL",
+      "SELECT t.* FROM transactions t LEFT JOIN categories c ON t.category_id = c.id WHERE category_id IS NULL AND c.user_id = $1",
+      [getUserId(req.user)],
     );
   } else {
     // todo akicha: this should be a part of the transactions service
     transactionsQueryResult = await pg.query(
-      "SELECT * FROM transactions WHERE category_id = $1",
-      [categoryId],
+      "SELECT t.* FROM transactions t LEFT JOIN categories c ON t.category_id = c.id WHERE category_id = $1 AND c.user_id = $2",
+      [categoryId, getUserId(req.user)],
     );
   }
 
@@ -59,8 +62,8 @@ router.post("/", authMiddleware, async (req, res) => {
     await client.query("BEGIN");
 
     const createCategoriesQueryResult = await pg.query(
-      "INSERT INTO categories (title) VALUES ($1) RETURNING *",
-      [title],
+      "INSERT INTO categories (title, user_id) VALUES ($1) RETURNING *",
+      [title, getUserId(req.user)],
     );
 
     const category = getPgQueryResultRows(
@@ -101,16 +104,29 @@ router.post("/:categoryId/transactions", authMiddleware, async (req, res) => {
     const { categoryId } = req.params;
     const { title, amount, timestamp } = req.body;
 
+    const categoryQueryResult = await pg.query(
+      "SELECT * FROM categories WHERE id = $1 AND user_id = $2",
+      [categoryId, getUserId(req.user)],
+    );
+    
+    const category = getPgQueryResultRows(categoryQueryResult)[0];
+
+    if (!category) {
+      res.status(403).send();
+      return;
+    }
+
     await client.query("BEGIN");
 
     // todo akicha: this should be a part of the transactions service
     const createTransactionQueryResult = await pg.query(
-      "INSERT INTO transactions (timestamp, amount) VALUES ($1, $2) RETURNING *",
+      "INSERT INTO transactions (timestamp, amount, user_id) VALUES ($1, $2, $3) RETURNING *",
       [
         !isNaN(Number(timestamp))
           ? new Date(Number(timestamp)).toISOString()
           : new Date().toISOString(),
         amount,
+        getUserId(req.user)
       ],
     );
 
@@ -146,9 +162,14 @@ router.post("/:categoryId/transactions", authMiddleware, async (req, res) => {
 });
 
 router.delete("/:categoryId", async (req, res) => {
-  const { categoryId } = req.params;
+  try {
+    const { categoryId } = req.params;
 
-  await pg.query("DELETE FROM categories WHERE id = $1", [categoryId]);
+    await pg.query("DELETE FROM categories WHERE id = $1 AND user_id = $2", [categoryId, getUserId(req.user)]);
 
-  res.status(200).send();
+    res.status(200).send();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send();
+  }
 });

@@ -18,8 +18,6 @@ export async function postRegister(payload: PostRegisterPayload) {
   if (!response.ok) {
     throw new Error("Failed to register user");
   }
-
-  return response.json() as Promise<void>;
 }
 
 interface PostLoginResponse {

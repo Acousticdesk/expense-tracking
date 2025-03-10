@@ -11,3 +11,7 @@ export interface DecodedUserToken {
 export function getUserPassword(user: User) {
     return user.password;
 }
+
+export function getUserId(user: User) {
+    return user.id;
+}
