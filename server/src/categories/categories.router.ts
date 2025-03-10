@@ -22,6 +22,24 @@ router.get("/", authMiddleware, async (req, res) => {
   res.json({ categories });
 });
 
+router.get("/:categoryId", authMiddleware, async (req, res) => {
+  const { categoryId } = req.params;
+
+  const categoryQueryResult = await pg.query(
+    "SELECT c.*, cc.hash as color_hash FROM categories c LEFT JOIN category_colors cc ON c.color_id = cc.id WHERE c.id = $1 AND c.user_id = $2",
+    [categoryId, getUserId(req.user)],
+  );
+
+  const category = getPgQueryResultRows(categoryQueryResult)[0];
+
+  if (!category) {
+    res.status(404).send();
+    return;
+  }
+
+  res.json(category);
+});
+
 router.get("/:categoryId/transactions", authMiddleware, async (req, res) => {
   const { categoryId } = req.params;
 

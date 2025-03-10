@@ -104,3 +104,9 @@ export function getCategoryColorName(categoryColor: CategoryColor) {
 export function getCategoryColorId(categoryColor: CategoryColor) {
   return categoryColor.id;
 }
+
+export async function fetchCategoryById(categoryId: Category["id"]) {
+  return fetch(`${import.meta.env.VITE_API_BASE_URL}/categories/${categoryId}`, {
+    headers: addAuthorizationHeader({}),
+  }).then((res) => res.json()) as Promise<Category>;
+}
