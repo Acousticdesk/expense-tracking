@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  client:
+    build: ./client
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    environment:
+      - VITE_API_BASE_URL=http://server:3000
+
+  server:
+    build: ./server
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      DB_USER=${DB_USER}
+      DB_HOST=db
+      DB_NAME=${DB_NAME}
+      DB_PASSWORD=${DB_PASSWORD}
+      DB_PORT=5432
+      JWT_SECRET=${JWT_SECRET}
+
+  db:
+    image: postgres:17.4
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
