@@ -5,8 +5,6 @@ services:
     build: ./client
     depends_on:
       - server
-    environment:
-      - VITE_API_BASE_URL=/api
     volumes:
       - client_build:/app/dist
 
