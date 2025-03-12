@@ -8,13 +8,16 @@ exports.up = function (knex) {
     table.float("amount").notNullable();
     table.timestamp("timestamp").defaultTo(knex.fn.now());
     table.string("title");
-    table.integer("user_id").unsigned();
+
+    table.integer("category_id").unsigned();
 
     table
       .foreign("category_id")
       .references("id")
       .inTable("categories")
       .onDelete("CASCADE");
+
+    table.integer("user_id").unsigned();
 
     table
       .foreign("user_id")
