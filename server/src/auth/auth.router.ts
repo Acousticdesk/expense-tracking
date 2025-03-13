@@ -2,14 +2,20 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { getPgQueryResultRows, pg } from "../services/pg";
-import { getUserId, getUserPassword } from "./auth.service";
+import {
+  generateTokens,
+  getUserId,
+  getUserPassword,
+  refreshTokenLRU,
+} from "./auth.service";
 import { authMiddleware } from "./auth.middleware";
 
 export const router = Router();
 
+// todo akicha: validate the request body
 router.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, deviceId } = req.body;
 
     const userQueryResult = await pg.query(
       "SELECT * FROM users WHERE username = $1",
@@ -32,10 +38,13 @@ router.post("/login", async (req, res) => {
       return;
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string);
+    const userId = getUserId(user);
+
+    const { token, refreshToken } = generateTokens({ userId, deviceId });
 
     res.status(200).json({
       token,
+      refreshToken,
     });
   } catch (error) {
     console.error(error);
@@ -75,6 +84,39 @@ router.post("/register", async (req, res) => {
   }
 
   client.release();
+});
+
+router.post("/refresh-token", async (req, res) => {
+  try {
+    const { refreshToken, deviceId } = req.body;
+
+    if (!refreshTokenLRU.has(refreshToken)) {
+      res.status(401).send();
+
+      return;
+    }
+
+    // todo akicha: remove the nested try/catch
+    try {
+      jwt.verify(refreshToken, process.env.JWT_SECRET as string);
+    } catch (error) {
+      console.error(error);
+      res.status(401).send();
+    }
+
+    const { token, refreshToken: newRefreshToken } = generateTokens({
+      userId: getUserId(req.user),
+      deviceId,
+    });
+
+    res.json({
+      token,
+      newRefreshToken,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send();
+  }
 });
 
 router.get("/me", authMiddleware, async (req, res) => {
