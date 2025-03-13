@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { ChartBarStacked, Plus } from "lucide-react";
+import { ChartBarStacked, Plus, Settings } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ export function TabBar({ className }: TabBarProps) {
   const navItems = [
     ["/", <Plus />],
     ["/categories", <ChartBarStacked />],
+    ["/settings", <Settings />],
   ] as const;
 
   return (

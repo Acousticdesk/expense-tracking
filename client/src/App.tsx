@@ -7,6 +7,7 @@ import { Categories } from "./screens/Categories";
 import { Login } from "./screens/Login";
 import { RequireToken } from "./components/RequireToken";
 import { SignUp } from "./screens/SignUp";
+import { Settings } from "./screens/Settings";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
 
         <Route path="/login" element={<Login />} />
         <Route path="/sign-up" element={<SignUp />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

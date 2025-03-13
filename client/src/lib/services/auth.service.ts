@@ -58,3 +58,18 @@ export function addAuthorizationHeader(headers: Record<string, string>) {
     Authorization: `Bearer ${localStorage.getItem("token")}`,
   };
 }
+
+interface UserProfile {
+  id: number;
+  username: string;
+}
+
+export function fetchUserProfile() {
+  return fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/me`, {
+    headers: addAuthorizationHeader({}),
+  }).then(res => res.json()) as Promise<UserProfile>;
+}
+
+export function getUsernameFromUserProfile (userProfile: UserProfile) {
+  return userProfile.username;
+}

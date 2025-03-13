@@ -77,7 +77,7 @@ router.post("/register", async (req, res) => {
   client.release();
 });
 
-router.post("/me", authMiddleware, async (req, res) => {
+router.get("/me", authMiddleware, async (req, res) => {
   try {
     res.json(req.user);
   } catch (error) {

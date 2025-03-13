@@ -9,3 +9,7 @@ export function getAddCategoryRoute() {
 export function getAddTransactionRoute(categoryId: number | string) {
   return `/categoties/${categoryId}/add-transaction`;
 }
+
+export function getSettingsRoute() {
+  return `/settings`;
+}
