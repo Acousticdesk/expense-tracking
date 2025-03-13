@@ -1,3 +1,4 @@
+import { axios } from "../axios";
 import { addAuthorizationHeader } from "./auth.service";
 import { Category } from "./categories.service";
 
@@ -16,14 +17,18 @@ interface PostTransactionsPayload {
   amount: string;
 }
 
-export async function fetchTransactionsPerCategory(categoryId?: Category["id"]) {
+export async function fetchTransactionsPerCategory(
+  categoryId?: Category["id"],
+) {
   const searchParams = new URLSearchParams();
   const _categoryId = categoryId || "all";
 
-  return fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/categories/${_categoryId}/transactions?${searchParams}`,
-    {headers: addAuthorizationHeader({})},
-  ).then((res) => res.json()) as Promise<FetchTransactionsPerCategoryResponse>;
+  const response = await axios.get<FetchTransactionsPerCategoryResponse>(
+    `/categories/${_categoryId}/transactions?${searchParams}`,
+    { headers: addAuthorizationHeader({}) },
+  );
+
+  return response.data;
 }
 
 interface CategorySplit {
@@ -51,12 +56,14 @@ export async function fetchTransactions(params?: FetchTransactionsParams) {
     searchParams.set("end_date", String(params.endDate));
   }
 
-  return fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/transactions?${searchParams}`,
+  const response = await axios.get<FetchTransactionsResponse>(
+    `/transactions?${searchParams}`,
     {
       headers: addAuthorizationHeader({}),
-    }
-  ).then((res) => res.json()) as Promise<FetchTransactionsResponse>;
+    },
+  );
+
+  return response.data;
 }
 
 export function getTransactionId(transaction: Transaction) {
@@ -93,22 +100,17 @@ export async function postTransactions(
   categoryId: string | number,
   payload: PostTransactionsPayload,
 ) {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/categories/${categoryId}/transactions`,
+  const response = await axios.post<Transaction>(
+    `/categories/${categoryId}/transactions`,
+    payload,
     {
-      method: "POST",
       headers: addAuthorizationHeader({
         "Content-Type": "application/json",
       }),
-      body: JSON.stringify(payload),
     },
   );
 
-  if (!response.ok) {
-    throw new Error("Failed to add transaction");
-  }
-
-  return response.json() as Promise<Transaction>;
+  return response.data;
 }
 
 export function getCategorySplitCategoryTitle(categorySplit: CategorySplit) {
@@ -123,6 +125,8 @@ export function getCategorySplitCategorySum(categorySplit: CategorySplit) {
   return categorySplit.sum;
 }
 
-export function getCategorySplitCategoryColorHash(categorySplit: CategorySplit) {
+export function getCategorySplitCategoryColorHash(
+  categorySplit: CategorySplit,
+) {
   return categorySplit.category_color_hash;
 }

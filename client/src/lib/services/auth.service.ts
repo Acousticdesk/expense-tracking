@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { axios } from "../axios";
 
 interface PostRegisterPayload {
   username: string;
@@ -6,20 +7,13 @@ interface PostRegisterPayload {
 }
 
 export async function postRegister(payload: PostRegisterPayload) {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/auth/register`,
-    {
-      method: "POST",
-      headers: addAuthorizationHeader({
-        "Content-Type": "application/json",
-      }),
-      body: JSON.stringify(payload),
-    },
-  );
+  const response = await axios.post(`/auth/register`, payload, {
+    headers: addAuthorizationHeader({
+      "Content-Type": "application/json",
+    }),
+  });
 
-  if (!response.ok) {
-    throw new Error("Failed to register user");
-  }
+  return response.data;
 }
 
 interface PostLoginResponse {
@@ -32,23 +26,14 @@ interface PostLoginPayload {
 }
 
 export async function postLogin(payload: PostLoginPayload) {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/auth/login`,
-    {
-      method: "POST",
-      headers: addAuthorizationHeader({
-        "Content-Type": "application/json",
-        "x-device-id": getDeviceId() || generateDeviceId(),
-      }),
-      body: JSON.stringify(payload),
-    },
-  );
+  const response = await axios.post<PostLoginResponse>(`/auth/login`, payload, {
+    headers: addAuthorizationHeader({
+      "Content-Type": "application/json",
+      "x-device-id": getDeviceId() || generateDeviceId(),
+    }),
+  });
 
-  if (!response.ok) {
-    throw new Error("Failed to login");
-  }
-
-  return response.json() as Promise<PostLoginResponse>;
+  return response.data;
 }
 
 export function getTokenFromPostLoginResponse(response: PostLoginResponse) {
@@ -67,10 +52,12 @@ interface UserProfile {
   username: string;
 }
 
-export function fetchUserProfile() {
-  return fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/me`, {
+export async function fetchUserProfile() {
+  const response = await axios.get<UserProfile>(`/auth/me`, {
     headers: addAuthorizationHeader({}),
-  }).then((res) => res.json()) as Promise<UserProfile>;
+  });
+
+  return response.data;
 }
 
 export function getUsernameFromUserProfile(userProfile: UserProfile) {

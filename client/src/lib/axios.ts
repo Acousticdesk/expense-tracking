@@ -67,6 +67,8 @@ axios.interceptors.response.use(
 
         localStorage.setItem("token", token);
 
+        originalRequest.headers["Authorization"] = `Bearer ${token}`;
+
         return axios(originalRequest);
       } catch (error) {
         window.location.href = "/login";

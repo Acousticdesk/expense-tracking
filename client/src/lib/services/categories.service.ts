@@ -1,3 +1,4 @@
+import { axios } from "../axios";
 import { addAuthorizationHeader } from "./auth.service";
 
 export interface Category {
@@ -26,9 +27,11 @@ interface PostCategoriesPayload {
 }
 
 export async function fetchCategories() {
-  return fetch(`${import.meta.env.VITE_API_BASE_URL}/categories`, {
+  const response = await axios.get<FetchCategoriesResponse>(`/categories`, {
     headers: addAuthorizationHeader({}),
-  }).then((res) => res.json()) as Promise<FetchCategoriesResponse>;
+  });
+
+  return response.data;
 }
 
 export function getCategoryId(category: Category) {
@@ -54,37 +57,24 @@ export function getCategoriesFromFetchCategoriesResponse(
 }
 
 export async function postCategories(payload: PostCategoriesPayload) {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/categories`,
-    {
-      method: "POST",
-      headers: addAuthorizationHeader({
-        "Content-Type": "application/json",
-      }),
-      body: JSON.stringify(payload),
-    },
-  );
+  const response = await axios.post<Category>(`/categories`, payload, {
+    headers: addAuthorizationHeader({
+      "Content-Type": "application/json",
+    }),
+  });
 
-  if (!response.ok) {
-    throw new Error("Failed to add category");
-  }
-
-  return response.json() as Promise<Category>;
+  return response.data;
 }
 
 export async function fetchCategoryColors() {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/categories/colors`,
+  const response = await axios.get<FetchCategoryColorsResponse>(
+    `/categories/colors`,
     {
       headers: addAuthorizationHeader({}),
-    }
+    },
   );
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch category colors");
-  }
-
-  return response.json() as Promise<FetchCategoryColorsResponse>;
+  return response.data;
 }
 
 export function getCategoryColorsFromFetchCategoryColorsResponse(
@@ -106,7 +96,9 @@ export function getCategoryColorId(categoryColor: CategoryColor) {
 }
 
 export async function fetchCategoryById(categoryId: Category["id"]) {
-  return fetch(`${import.meta.env.VITE_API_BASE_URL}/categories/${categoryId}`, {
+  const response = await axios.get<Category>(`/categories/${categoryId}`, {
     headers: addAuthorizationHeader({}),
-  }).then((res) => res.json()) as Promise<Category>;
+  });
+
+  return response.data;
 }
