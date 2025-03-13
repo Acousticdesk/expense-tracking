@@ -170,8 +170,8 @@ export function attachRefreshTokenToResponse(
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: !process.env.IS_DEV,
-    sameSite: "strict",
-    path: "/refresh-token",
+    sameSite: process.env.IS_DEV ? "none" : "strict",
+    path: "/auth/refresh",
   });
 }
 

@@ -11,7 +11,6 @@ import {
   getUserId,
   getUserIdFromDecodedRefreshToken,
   getUserPassword,
-  refreshTokenLRU,
 } from "./auth.service";
 import { authMiddleware } from "./auth.middleware";
 
@@ -50,9 +49,10 @@ router.post("/login", async (req, res) => {
 
     const { token, refreshToken } = generateTokens({ userId, deviceId });
 
+    attachRefreshTokenToResponse(res, refreshToken);
+
     res.json({
       token,
-      refreshToken,
     });
   } catch (error) {
     console.error(error);
@@ -94,15 +94,14 @@ router.post("/register", async (req, res) => {
   client.release();
 });
 
-router.post("/refresh-token", async (req, res) => {
+router.post("/refresh", async (req, res) => {
   try {
     const { refreshToken } = req.cookies.refreshToken;
     const deviceId = req.headers["x-device-id"] as string;
 
     if (!refreshToken) {
       console.error(
-        "Refresh token is missing for the user id: ",
-        getUserId(req.user),
+        "Refresh token is missing for the request. Aborting.",
       );
 
       res.status(401).json({});
@@ -132,14 +131,14 @@ router.post("/refresh-token", async (req, res) => {
         refreshToken,
       })
     ) {
-      console.log("invalid refresh token for user id:", getUserId(req.user));
+      console.log("invalid refresh token for user id:", getUserIdFromDecodedRefreshToken(decodedRefreshToken));
       res.status(401).json({});
 
       return;
     }
 
     const { token, refreshToken: newRefreshToken } = generateTokens({
-      userId: getUserId(req.user),
+      userId: getUserIdFromDecodedRefreshToken(decodedRefreshToken),
       deviceId,
     });
 
@@ -147,7 +146,6 @@ router.post("/refresh-token", async (req, res) => {
 
     res.json({
       token,
-      newRefreshToken,
     });
   } catch (error) {
     console.error(error);
