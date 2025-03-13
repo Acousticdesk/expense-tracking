@@ -1,4 +1,5 @@
 import _axios from "axios";
+import { queryClient } from "./useQuery";
 
 export const axios = _axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -50,6 +51,7 @@ axios.interceptors.response.use(
 
       isRefreshing = true;
       localStorage.removeItem("token");
+      queryClient.resetQueries();
 
       try {
         const { data: refreshTokenResponse } = await axios.post(
@@ -73,9 +75,9 @@ axios.interceptors.response.use(
       } catch (error) {
         window.location.href = "/login";
         console.error(error);
+        onRefreshed("refresh-token error");
       } finally {
         isRefreshing = false;
-        onRefreshed("refresh-token error");
       }
     }
 

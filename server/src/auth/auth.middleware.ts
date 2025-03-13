@@ -11,6 +11,8 @@ export async function authMiddleware(
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
+    console.log("No valid authorization header found in the request. Aborting.");
+
     res.status(401).json({});
     return;
   }
@@ -41,11 +43,13 @@ export async function authMiddleware(
 
     req.user = user;
   } catch (error) {
+    console.log(error);
+    
     if (error instanceof Error && error.name === "TokenExpiredError") {
       res.status(401).json({ code: "TOKEN_EXPIRED" });
       return;
     }
-    console.log(error);
+    
     res.status(401).json({});
     return;
   }

@@ -39,10 +39,10 @@ export const refreshTokenLRU = new LRUCache<string, RefreshTokenLRUEntry[]>({
 
 function generateAccessToken(userId: User["id"]) {
   return jwt.sign(
-    { id: userId, expires: Date.now() + 15 * 60 * 1000 },
+    { id: userId, expires: Date.now() + 5 * 1000 },
     process.env.JWT_SECRET as string,
     {
-      expiresIn: "15min",
+      expiresIn: 5,
     },
   );
 }
@@ -170,8 +170,9 @@ export function attachRefreshTokenToResponse(
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: !process.env.IS_DEV,
-    sameSite: process.env.IS_DEV ? "none" : "strict",
-    path: "/auth/refresh",
+    sameSite: process.env.IS_DEV ? undefined : "strict",
+    // prepend /api because this is how the FE calls the endpoint via nginx
+    path: "/api/auth/refresh",
   });
 }
 

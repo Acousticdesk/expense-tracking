@@ -96,12 +96,12 @@ router.post("/register", async (req, res) => {
 
 router.post("/refresh", async (req, res) => {
   try {
-    const { refreshToken } = req.cookies.refreshToken;
+    const { refreshToken } = req.cookies;
     const deviceId = req.headers["x-device-id"] as string;
 
     if (!refreshToken) {
       console.error(
-        "Refresh token is missing for the request. Aborting.",
+        "Refresh token is missing in the request. Aborting.",
       );
 
       res.status(401).json({});
