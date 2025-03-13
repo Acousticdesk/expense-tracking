@@ -33,7 +33,7 @@ router.get("/:categoryId", authMiddleware, async (req, res) => {
   const category = getPgQueryResultRows(categoryQueryResult)[0];
 
   if (!category) {
-    res.status(404).send();
+    res.status(404).json({});
     return;
   }
 
@@ -109,7 +109,7 @@ router.post("/", authMiddleware, async (req, res) => {
     // todo akicha: properly handle the pg transaction error and only rollback if it's a pg error
     await client.query("ROLLBACK");
     console.log(error, "the error");
-    res.status(500).send();
+    res.status(500).json({});
   }
 
   client.release();
@@ -130,7 +130,7 @@ router.post("/:categoryId/transactions", authMiddleware, async (req, res) => {
     const category = getPgQueryResultRows(categoryQueryResult)[0];
 
     if (!category) {
-      res.status(403).send();
+      res.status(403).json({});
       return;
     }
 
@@ -173,7 +173,7 @@ router.post("/:categoryId/transactions", authMiddleware, async (req, res) => {
     // todo akicha: properly handle the pg transaction error and only rollback if it's a pg error
     await client.query("ROLLBACK");
     console.log(error, "the error");
-    res.status(500).send();
+    res.status(500).json({});
   }
 
   client.release();
@@ -185,9 +185,9 @@ router.delete("/:categoryId", async (req, res) => {
 
     await pg.query("DELETE FROM categories WHERE id = $1 AND user_id = $2", [categoryId, getUserId(req.user)]);
 
-    res.status(200).send();
+    res.json({});
   } catch (error) {
     console.error(error);
-    res.status(500).send();
+    res.status(500).json({});
   }
 });

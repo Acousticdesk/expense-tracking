@@ -1,3 +1,5 @@
+import { nanoid } from "nanoid";
+
 interface PostRegisterPayload {
   username: string;
   password: string;
@@ -36,6 +38,7 @@ export async function postLogin(payload: PostLoginPayload) {
       method: "POST",
       headers: addAuthorizationHeader({
         "Content-Type": "application/json",
+        "x-device-id": getDeviceId() || generateDeviceId(),
       }),
       body: JSON.stringify(payload),
     },
@@ -55,7 +58,7 @@ export function getTokenFromPostLoginResponse(response: PostLoginResponse) {
 export function addAuthorizationHeader(headers: Record<string, string>) {
   return {
     ...headers,
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   };
 }
 
@@ -67,9 +70,33 @@ interface UserProfile {
 export function fetchUserProfile() {
   return fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/me`, {
     headers: addAuthorizationHeader({}),
-  }).then(res => res.json()) as Promise<UserProfile>;
+  }).then((res) => res.json()) as Promise<UserProfile>;
 }
 
-export function getUsernameFromUserProfile (userProfile: UserProfile) {
+export function getUsernameFromUserProfile(userProfile: UserProfile) {
   return userProfile.username;
+}
+
+export function getAccessToken() {
+  return localStorage.getItem("token");
+}
+
+export function setAccessToken(token: string) {
+  return localStorage.setItem("token", token);
+}
+
+export function removeAccessToken() {
+  return localStorage.removeItem("token");
+}
+
+export function generateDeviceId() {
+  return nanoid();
+}
+
+export function getDeviceId() {
+  return localStorage.getItem("deviceId");
+}
+
+export function setDeviceId(deviceId: string) {
+  return localStorage.setItem("deviceId", deviceId);
 }

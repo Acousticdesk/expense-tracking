@@ -67,7 +67,7 @@ router.post("/", authMiddleware, async (req, res) => {
   } catch (error) {
     await client.query("ROLLBACK");
     console.log(error, "the error");
-    res.status(500).send();
+    res.status(500).json({});
   }
 
   client.release();
@@ -81,5 +81,5 @@ router.delete("/:transactionId", authMiddleware, async (req, res) => {
     getUserId(req.user),
   ]);
 
-  res.status(200).send();
+  res.json({});
 });

@@ -36,9 +36,12 @@ function App() {
           <Route path="/categories/:categoryId" element={<CategoryDetails />} />
         </Route>
 
+        <Route element={<RequireToken />}>
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+
         <Route path="/login" element={<Login />} />
         <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

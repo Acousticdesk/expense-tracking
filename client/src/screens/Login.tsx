@@ -18,6 +18,11 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   postLogin,
   getTokenFromPostLoginResponse,
+  setAccessToken,
+  getAccessToken,
+  getDeviceId,
+  setDeviceId,
+  generateDeviceId,
 } from "@/lib/services/auth.service";
 
 const formSchema = z.object({
@@ -39,19 +44,21 @@ export function Login() {
   async function _handleSubmit() {
     try {
       const values = form.getValues();
+
+      if (!getDeviceId()) {
+        setDeviceId(generateDeviceId());
+      }
+
       const response = await postLogin(values);
-
       const token = getTokenFromPostLoginResponse(response);
-
-      localStorage.setItem("token", token);
-
+      setAccessToken(token);
       navigate("/");
     } catch (error) {
       console.error(error);
     }
   }
 
-  const token = localStorage.getItem("token");
+  const token = getAccessToken();
 
   if (token) {
     return <Navigate to="/" />;

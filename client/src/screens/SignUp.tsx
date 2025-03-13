@@ -15,9 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/Container";
 import { Header } from "@/components/Header";
 import {
+  getAccessToken,
   getTokenFromPostLoginResponse,
   postLogin,
   postRegister,
+  setAccessToken,
 } from "@/lib/services/auth.service";
 import { toast } from "sonner";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -44,11 +46,8 @@ export function SignUp() {
     try {
       await postRegister(values);
       const response = await postLogin(values);
-
       const token = getTokenFromPostLoginResponse(response);
-
-      localStorage.setItem("token", token);
-
+      setAccessToken(token);
       navigate("/");
     } catch (error) {
       console.log(error);
@@ -58,7 +57,7 @@ export function SignUp() {
     form.reset();
   }
 
-  const token = localStorage.getItem("token");
+  const token = getAccessToken();
 
   if (token) {
     return <Navigate to="/" />;

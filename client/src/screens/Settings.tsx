@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   fetchUserProfile,
   getUsernameFromUserProfile,
+  removeAccessToken,
 } from "@/lib/services/auth.service";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +27,7 @@ export function Settings() {
         <div className="py-2">
           <p className="mb-4 text-xl">{isUserProfileLoading ? "Loading..." : `Hello, ${username}`}</p>
           <Button variant="destructive" onClick={() => {
-            window.localStorage.removeItem("token");
+            removeAccessToken();
             navigate("/");
             
           }}>Sign Out</Button>

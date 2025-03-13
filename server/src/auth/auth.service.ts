@@ -1,5 +1,6 @@
 import { LRUCache } from "lru-cache";
 import jwt from "jsonwebtoken";
+import { Response } from "express";
 
 interface User {
   id: number;
@@ -9,6 +10,7 @@ interface User {
 
 export interface DecodedUserToken {
   id: number;
+  expires: number;
 }
 
 export function getUserPassword(user: User) {
@@ -17,6 +19,11 @@ export function getUserPassword(user: User) {
 
 export function getUserId(user: User) {
   return user.id;
+}
+
+export interface DecodedRefreshToken {
+  userId: User["id"];
+  deviceId: string;
 }
 
 interface RefreshTokenLRUEntry {
@@ -31,11 +38,16 @@ export const refreshTokenLRU = new LRUCache<string, RefreshTokenLRUEntry[]>({
 });
 
 function generateAccessToken(userId: User["id"]) {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET as string, {
-    expiresIn: "15min",
-  });
+  return jwt.sign(
+    { id: userId, expires: Date.now() + 15 * 60 * 1000 },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: "15min",
+    },
+  );
 }
 
+// todo akicha: use a different secret for the refresh token
 function generateRefreshToken(userId: User["id"], deviceId: string) {
   return jwt.sign(
     { userId: userId, deviceId },
@@ -77,6 +89,25 @@ function invalidateRefreshTokenLRUEntry({
     existingRefreshTokens
       ? existingRefreshTokens.filter((entry) => entry.deviceId !== deviceId)
       : [],
+  );
+}
+
+interface FindRefreshTokenLRUEntryParams {
+  userId: User["id"];
+  refreshToken: string;
+  deviceId: string;
+}
+
+export function findRefreshTokenLRUEntry({
+  userId,
+  refreshToken,
+  deviceId,
+}: FindRefreshTokenLRUEntryParams) {
+  const existingRefreshTokens = refreshTokenLRU.get(String(userId));
+
+  return existingRefreshTokens?.find(
+    (entry) =>
+      entry.deviceId === deviceId && entry.refreshToken === refreshToken,
   );
 }
 
@@ -130,4 +161,28 @@ export function generateTokens({ userId, deviceId }: GenerateTokensParams) {
     token,
     refreshToken,
   };
+}
+
+export function attachRefreshTokenToResponse(
+  res: Response,
+  refreshToken: string,
+) {
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: !process.env.IS_DEV,
+    sameSite: "strict",
+    path: "/refresh-token",
+  });
+}
+
+export function getUserIdFromDecodedRefreshToken(
+  decodedRefreshToken: DecodedRefreshToken,
+) {
+  return decodedRefreshToken.userId;
+}
+
+export function getDeviceIdFromDecodedRefreshToken(
+  decodedRefreshToken: DecodedRefreshToken,
+) {
+  return decodedRefreshToken.deviceId;
 }

@@ -3,8 +3,13 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { getPgQueryResultRows, pg } from "../services/pg";
 import {
+  attachRefreshTokenToResponse,
+  DecodedRefreshToken,
+  findRefreshTokenLRUEntry,
   generateTokens,
+  getDeviceIdFromDecodedRefreshToken,
   getUserId,
+  getUserIdFromDecodedRefreshToken,
   getUserPassword,
   refreshTokenLRU,
 } from "./auth.service";
@@ -12,10 +17,11 @@ import { authMiddleware } from "./auth.middleware";
 
 export const router = Router();
 
-// todo akicha: validate the request body
+// todo akicha: validate the request body and headers
 router.post("/login", async (req, res) => {
   try {
-    const { username, password, deviceId } = req.body;
+    const { username, password } = req.body;
+    const deviceId = req.headers["x-device-id"] as string;
 
     const userQueryResult = await pg.query(
       "SELECT * FROM users WHERE username = $1",
@@ -25,7 +31,8 @@ router.post("/login", async (req, res) => {
     const user = getPgQueryResultRows(userQueryResult)[0];
 
     if (!user) {
-      res.status(401).send();
+      console.error("User not found for the username: ", username);
+      res.status(401).json({});
 
       return;
     }
@@ -33,7 +40,8 @@ router.post("/login", async (req, res) => {
     const userPassword = getUserPassword(user);
 
     if (!(await bcrypt.compare(password, userPassword))) {
-      res.status(401).send();
+      console.error("Invalid password for the user: ", username);
+      res.status(401).json({});
 
       return;
     }
@@ -42,13 +50,13 @@ router.post("/login", async (req, res) => {
 
     const { token, refreshToken } = generateTokens({ userId, deviceId });
 
-    res.status(200).json({
+    res.json({
       token,
       refreshToken,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send();
+    res.status(500).json({});
   }
 });
 
@@ -76,11 +84,11 @@ router.post("/register", async (req, res) => {
 
     await client.query("COMMIT");
 
-    res.status(201).send();
+    res.status(201).json({});
   } catch (error) {
     await client.query("ROLLBACK");
     console.error(error);
-    res.status(500).send();
+    res.status(500).json({});
   }
 
   client.release();
@@ -88,20 +96,46 @@ router.post("/register", async (req, res) => {
 
 router.post("/refresh-token", async (req, res) => {
   try {
-    const { refreshToken, deviceId } = req.body;
+    const { refreshToken } = req.cookies.refreshToken;
+    const deviceId = req.headers["x-device-id"] as string;
 
-    if (!refreshTokenLRU.has(refreshToken)) {
-      res.status(401).send();
+    if (!refreshToken) {
+      console.error(
+        "Refresh token is missing for the user id: ",
+        getUserId(req.user),
+      );
+
+      res.status(401).json({});
 
       return;
     }
 
+    let decodedRefreshToken: DecodedRefreshToken;
+
     // todo akicha: remove the nested try/catch
     try {
-      jwt.verify(refreshToken, process.env.JWT_SECRET as string);
+      decodedRefreshToken = jwt.verify(
+        refreshToken,
+        process.env.JWT_SECRET as string,
+      ) as DecodedRefreshToken;
     } catch (error) {
       console.error(error);
-      res.status(401).send();
+      res.status(401).json({});
+
+      return;
+    }
+
+    if (
+      !findRefreshTokenLRUEntry({
+        userId: getUserIdFromDecodedRefreshToken(decodedRefreshToken),
+        deviceId: getDeviceIdFromDecodedRefreshToken(decodedRefreshToken),
+        refreshToken,
+      })
+    ) {
+      console.log("invalid refresh token for user id:", getUserId(req.user));
+      res.status(401).json({});
+
+      return;
     }
 
     const { token, refreshToken: newRefreshToken } = generateTokens({
@@ -109,13 +143,15 @@ router.post("/refresh-token", async (req, res) => {
       deviceId,
     });
 
+    attachRefreshTokenToResponse(res, newRefreshToken);
+
     res.json({
       token,
       newRefreshToken,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send();
+    res.status(500).json({});
   }
 });
 
@@ -124,6 +160,6 @@ router.get("/me", authMiddleware, async (req, res) => {
     res.json(req.user);
   } catch (error) {
     console.error(error);
-    res.status(500).send();
+    res.status(500).json({});
   }
 });
