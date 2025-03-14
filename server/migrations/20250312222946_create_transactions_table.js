@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-  return knex.schema.createTable("transactions", function (table) {
+  return knex.schema.createTableIfNotExists("transactions", function (table) {
     table.increments("id").primary();
     table.float("amount").notNullable();
     table.timestamp("timestamp").defaultTo(knex.fn.now());

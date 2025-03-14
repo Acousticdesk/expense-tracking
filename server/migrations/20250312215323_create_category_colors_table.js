@@ -3,6 +3,12 @@
  * @returns { Promise<void> }
  */
 exports.up = async function (knex) {
+  const hasTable = await knex.schema.hasTable("category_colors");
+
+  if (hasTable) {
+    return;
+  }
+
   await knex.schema.createTable("category_colors", (table) => {
     table.increments("id").primary();
     table.string("name").notNullable();

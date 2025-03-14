@@ -3,6 +3,12 @@
  * @returns { Promise<void> }
  */
 exports.up = async function (knex) {
+  const hasTable = await knex.schema.hasTable("default_categories");
+
+  if (hasTable) {
+    return;
+  }
+
   await knex.schema.createTable("default_categories", function (table) {
     table.increments("id").primary();
     table.string("title").notNullable().unique();
