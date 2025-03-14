@@ -39,10 +39,10 @@ export const refreshTokenLRU = new LRUCache<string, RefreshTokenLRUEntry[]>({
 
 function generateAccessToken(userId: User["id"]) {
   return jwt.sign(
-    { id: userId, expires: Date.now() + 5 * 1000 },
+    { id: userId, expires: Date.now() + 10 * 60 * 1000 },
     process.env.JWT_SECRET as string,
     {
-      expiresIn: 5,
+      expiresIn: "10m",
     },
   );
 }

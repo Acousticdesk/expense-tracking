@@ -71,6 +71,30 @@ router.get("/colors", authMiddleware, async (_, res) => {
   res.json({ colors });
 });
 
+router.get(
+  "/:categoryId/quick-transactions",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { categoryId } = req.params;
+
+      const quickTransactionsQueryResult = await pg.query(
+        "SELECT * FROM default_quick_transactions WHERE default_category_id = (SELECT id FROM default_categories dc WHERE dc.id = $1)",
+        [categoryId],
+      );
+
+      const quickTransactions = getPgQueryResultRows(
+        quickTransactionsQueryResult,
+      );
+
+      res.json({ quickTransactions });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({});
+    }
+  },
+);
+
 router.post("/", authMiddleware, async (req, res) => {
   const client = await pg.connect();
 
@@ -126,7 +150,7 @@ router.post("/:categoryId/transactions", authMiddleware, async (req, res) => {
       "SELECT * FROM categories WHERE id = $1 AND user_id = $2",
       [categoryId, getUserId(req.user)],
     );
-    
+
     const category = getPgQueryResultRows(categoryQueryResult)[0];
 
     if (!category) {
@@ -144,7 +168,7 @@ router.post("/:categoryId/transactions", authMiddleware, async (req, res) => {
           ? new Date(Number(timestamp)).toISOString()
           : new Date().toISOString(),
         amount,
-        getUserId(req.user)
+        getUserId(req.user),
       ],
     );
 
@@ -183,7 +207,10 @@ router.delete("/:categoryId", async (req, res) => {
   try {
     const { categoryId } = req.params;
 
-    await pg.query("DELETE FROM categories WHERE id = $1 AND user_id = $2", [categoryId, getUserId(req.user)]);
+    await pg.query("DELETE FROM categories WHERE id = $1 AND user_id = $2", [
+      categoryId,
+      getUserId(req.user),
+    ]);
 
     res.json({});
   } catch (error) {

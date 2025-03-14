@@ -77,6 +77,7 @@ router.post("/register", async (req, res) => {
 
     const user = getPgQueryResultRows(userQueryResult)[0];
 
+    // todo akicha: these two queries below should be a part of the categories and quick_transactions services
     await pg.query(
       "INSERT INTO categories (title, color_id, user_id) SELECT title, color_id, $1 FROM default_categories;",
       [getUserId(user)],
@@ -100,9 +101,7 @@ router.post("/refresh", async (req, res) => {
     const deviceId = req.headers["x-device-id"] as string;
 
     if (!refreshToken) {
-      console.error(
-        "Refresh token is missing in the request. Aborting.",
-      );
+      console.error("Refresh token is missing in the request. Aborting.");
 
       res.status(401).json({});
 
@@ -131,7 +130,10 @@ router.post("/refresh", async (req, res) => {
         refreshToken,
       })
     ) {
-      console.log("invalid refresh token for user id:", getUserIdFromDecodedRefreshToken(decodedRefreshToken));
+      console.log(
+        "invalid refresh token for user id:",
+        getUserIdFromDecodedRefreshToken(decodedRefreshToken),
+      );
       res.status(401).json({});
 
       return;
