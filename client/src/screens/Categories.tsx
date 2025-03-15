@@ -33,6 +33,7 @@ export function Categories() {
     queryKey: ["transactions", dateRange[0], dateRange[1]],
     queryFn: () =>
       fetchTransactions({ startDate: dateRange[0], endDate: dateRange[1] }),
+    placeholderData: (prevData) => prevData,
   });
 
   const total = data ? getTotalFromFetchTransactionsResponse(data) : undefined;

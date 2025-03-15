@@ -39,6 +39,10 @@ export function AddTransactionCategoryPicker({
   const categories =
     getCategoriesFromFetchCategoriesResponse(categoriesResponse);
 
+  if (!categories?.length) {
+    return null;
+  }
+
   return (
     <ul className="flex gap-4 flex-wrap">
       {categories.map((category) => (

@@ -27,11 +27,9 @@ interface PostCategoriesPayload {
 }
 
 export async function fetchCategories() {
-  const response = await axios.get<FetchCategoriesResponse>(`/categories`, {
-    headers: addAuthorizationHeader({}),
-  });
+  const { data } = await axios.get<FetchCategoriesResponse>(`/categories`);
 
-  return response.data;
+  return data;
 }
 
 export function getCategoryId(category: Category) {
@@ -57,24 +55,24 @@ export function getCategoriesFromFetchCategoriesResponse(
 }
 
 export async function postCategories(payload: PostCategoriesPayload) {
-  const response = await axios.post<Category>(`/categories`, payload, {
-    headers: addAuthorizationHeader({
+  const { data } = await axios.post<Category>(`/categories`, payload, {
+    headers: {
       "Content-Type": "application/json",
-    }),
+    },
   });
 
-  return response.data;
+  return data;
 }
 
 export async function fetchCategoryColors() {
-  const response = await axios.get<FetchCategoryColorsResponse>(
+  const { data } = await axios.get<FetchCategoryColorsResponse>(
     `/categories/colors`,
     {
       headers: addAuthorizationHeader({}),
     },
   );
 
-  return response.data;
+  return data;
 }
 
 export function getCategoryColorsFromFetchCategoryColorsResponse(
@@ -96,9 +94,39 @@ export function getCategoryColorId(categoryColor: CategoryColor) {
 }
 
 export async function fetchCategoryById(categoryId: Category["id"]) {
-  const response = await axios.get<Category>(`/categories/${categoryId}`, {
-    headers: addAuthorizationHeader({}),
-  });
+  const { data } = await axios.get<Category>(`/categories/${categoryId}`);
 
-  return response.data;
+  return data;
+}
+
+interface QuickTransaction {
+  category_id: number;
+  title: string;
+  id: number;
+}
+
+interface FetchQuickTransactionsResponse {
+  quickTransactions: QuickTransaction[];
+}
+
+export async function fetchQuickTransactions(categoryId: Category["id"]) {
+  const { data } = await axios.get(
+    `/categories/${categoryId}/quick-transactions`,
+  );
+
+  return data;
+}
+
+export function getQuickTransactionsFromFetchQuickTransactionsResponse(
+  response: FetchQuickTransactionsResponse,
+) {
+  return response.quickTransactions;
+}
+
+export function getQuickTransactionId(quickTransaction: QuickTransaction) {
+  return quickTransaction.id;
+}
+
+export function getQuickTransactionTitle(quickTransaction: QuickTransaction) {
+  return quickTransaction.title;
 }

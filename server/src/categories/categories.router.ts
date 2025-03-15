@@ -79,7 +79,7 @@ router.get(
       const { categoryId } = req.params;
 
       const quickTransactionsQueryResult = await pg.query(
-        "SELECT * FROM default_quick_transactions WHERE default_category_id = (SELECT id FROM default_categories dc WHERE dc.id = $1)",
+        "SELECT * FROM default_quick_transactions WHERE default_category_id = (SELECT default_category_id FROM categories c WHERE c.id = $1)",
         [categoryId],
       );
 

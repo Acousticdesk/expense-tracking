@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { AddTransactionCategoryPicker } from "@/components/AddTransactionCategoryPicker";
 import { AddTransactionDatePicker } from "@/components/AddTransactionDatePicker";
+import { AddQuickTransactionTitlePicker } from "@/components/AddQuickTransactionTitlePicker";
 
 const formSchema = z.object({
   title: z.string().optional(),
@@ -44,9 +45,11 @@ export function AddTransaction() {
     },
   });
 
+  const categoryIdFormValue = form.watch("category_id");
+  const selectedCategoryId = _categoryId || categoryIdFormValue;
+
   async function _handleSubmit() {
     const values = form.getValues();
-    const selectedCategoryId = _categoryId || values.category_id;
 
     if (!selectedCategoryId) {
       console.log(
@@ -73,40 +76,14 @@ export function AddTransaction() {
   return (
     <Layout>
       <Container className="flex-auto">
-        <div className="py-2">
+        <div className="py-4">
           <p className="text-xl">Add Transaction</p>
 
           <Form {...form}>
             <form
-              className="flex flex-col gap-y-4 mt-2"
+              className="flex flex-col gap-y-8 mt-4"
               onSubmit={form.handleSubmit(_handleSubmit)}
             >
-              <FormField
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amount</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="tel" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <FormField
                 name="category_id"
                 defaultValue={_categoryId}
@@ -115,6 +92,51 @@ export function AddTransaction() {
                     <FormLabel>Category</FormLabel>
                     <FormControl>
                       <AddTransactionCategoryPicker {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex flex-col gap-y-2">
+                <FormField
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="text-sm" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {selectedCategoryId ? (
+                  <FormField
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <AddQuickTransactionTitlePicker
+                            {...field}
+                            categoryId={Number(selectedCategoryId)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : null}
+              </div>
+
+              <FormField
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Amount</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="tel" className="text-sm" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
